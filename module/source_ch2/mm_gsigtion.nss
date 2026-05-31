@@ -1,0 +1,20 @@
+//::///////////////////////////////////////////////
+//:: FileName mm_gsigtion
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 26.05.2007 17:57:51
+//:://////////////////////////////////////////////
+void main()
+{
+
+object oPC = GetPCSpeaker();
+
+CreateItemOnObject("sig_tion", oPC);
+
+object oTarget;
+oTarget = GetObjectByTag("door_tion");
+
+AssignCommand(oTarget, ActionOpenDoor(oTarget));
+
+}

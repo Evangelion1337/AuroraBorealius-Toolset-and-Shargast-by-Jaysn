@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName at_085
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 2/8/2003 5:52:43 AM
+//:://////////////////////////////////////////////
+void main()
+{
+    // Give the speaker the items
+    CreateItemOnObject("duckhelm", GetPCSpeaker(), 1);
+
+    // Set the variables
+    SetLocalInt(GetPCSpeaker(), "arenabuy2", 1);
+
+}

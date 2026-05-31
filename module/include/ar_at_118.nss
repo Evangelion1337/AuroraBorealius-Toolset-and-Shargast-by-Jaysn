@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName at_118
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 2/8/2003 5:56:15 AM
+//:://////////////////////////////////////////////
+void main()
+{
+    // Give the speaker the items
+    CreateItemOnObject("robesofmilambyr", GetPCSpeaker(), 1);
+
+    // Set the variables
+    SetLocalInt(GetPCSpeaker(), "arenabuy7", 1);
+
+}

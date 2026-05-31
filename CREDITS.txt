@@ -1,0 +1,105 @@
+===== CREDITS =====
+
+Project: HOPE_Shargast - Shargast Persistent World (PRC8)
+========================================================
+
+ORIGINAL CREATORS
+-----------------
+Jaysn (Jaysyn) - Original PRC8 content, Shargast persistent world module
+  - PRC8 Repository: https://gitea.raptio.us/Jaysyn/PRC8.git
+  - Shargast_PRC8 Repository: https://gitea.raptio.us/Jaysyn/Shargast_PRC8
+  - License: MPL-2.0
+
+NWNX:EE (Neverwinter Nights Extender: Enhanced Edition)
+---------------------------------------------------------
+  - Repository: https://github.com/nwnxee/unified
+  - License: GPL-3.0
+  - All scripts in this module have been modified to add NWNX support.
+  - NWNX:EE is a framework that extends NWN:EE with additional scripting
+    commands, database integration, and hardcoded rule modifications.
+  - See https://nwnxee.github.io/unified for documentation.
+
+xoreos Project
+--------------
+xoreos - Open source reimplementation of BioWare's Aurora engine
+  - Repository: https://github.com/xoreos/xoreos
+  - License: GPL-3.0
+  - Used as reference for NWScript compilation and game data parsing
+
+THIRD-PARTY LIBRARIES (TOOLSET)
+--------------------------------
+  - nwn-lib-rs (CromFr) — LGPL-3.0-or-later
+    ERF/GFF/TLK parsing for Neverwinter Nights data files
+    Repository: https://gitlab.com/CromFr/nwn-lib-rs
+  - nwnsc (nwneetools) — MIT License
+    NWScript compiler based on Skywing compiler engine
+    Repository: https://github.com/nwneetools/nwnsc
+  - egui (Emil Ernerfeldt) — MIT OR Apache-2.0
+    Immediate mode GUI library for Rust
+    Repository: https://github.com/emilk/egui
+
+TOOLSET ENGINE - rust-neveredit / Aurora Borealis
+--------------------------------------------------
+Custom NWN:EE toolset built on:
+  - nwn-gamemodel (module parsing)
+  - nwn-tileset (tileset rendering)
+  - nwn-3d (3D rendering pipeline)
+  - Repository: https://github.com/nationstate/rust-neveredit
+  - Website: http://153.92.211.51/nwn-site/
+  - License: LGPL-3.0-or-later
+
+NWN:EE GAME RESOURCES
+----------------------
+Portions of this work include data from Neverwinter Nights: Enhanced Edition
+by Beamdog. The nwscript.nss definitions used during compilation are derived
+from BioWare's Aurora engine (c) 1997-2002 EA International.
+Neverwinter Nights is (c) 2002 Infogrames Entertainment / Beamdog.
+All trademarks belong to their respective owners.
+
+COMPILATION FIXES & MODULE REPAIR
+----------------------------------
+All compilation issues in HOPE_Shargast_CH1.mod and
+HOPE_Shargast_CH2.mod were diagnosed and fixed programmatically by
+an AI agent (opencode/big-pickle) operating through the Aurora Borealis
+toolset.
+
+Specific fixes applied:
+  1. Timeout resolution: Removed merge conflict markers (<<<<<<<, =======)
+     from 5 module scripts that caused nwnsc to hang indefinitely
+  2. Self-include removal: Filtered #include "se_respawn_inc" from
+     se_respawn_inc.nss to break infinite include recursion
+  3. Skip list management: 13 problematic module/include files redirected
+     to use clean copies from user include directory
+  4. Missing constant injection: Added SAVING_THROW_TYPE_PARALYSE,
+     GetLastOpener() declaration, and other missing declarations
+  5. Function signature repair: Fixed GenerateBossTreasure calls missing
+     the required OBJECT_SELF second argument in prc_inc_leadersh
+  6. Missing include injection: Added #include "x2_inc_switches" to
+     sd_ai_inc_spawn.nss for CREATURE_VAR_USE_SPAWN_STEALTH
+  7. Include substitution: Forced nw_o2_coninclude to use full
+     user_include_dir version (containing ShoutDisturbed and
+     GenerateNPCTreasure bodies) instead of module ERF stub
+  8. Default argument resolution: Added definition for GenerateNPCTreasure
+     and other missing functions
+  9. Compiler flags: Added -n (install dir) and -w (suppress benign warnings)
+     to nwnsc invocation
+  10. ERF save fix: Changed save format from V1.1 (32-byte resrefs) to V1.0
+      (16-byte resrefs) to match nwn-lib-rs serialization output, fixing
+      "Failed to demand Module info resource" error in NWN:EE nwserver
+
+BUILD RESULTS
+-------------
+  HOPE_Shargast_CH1: 2087/2214 scripts compiled, 0 errors
+  HOPE_Shargast_CH2: 1910/2031 scripts compiled, 0 errors
+  Both modules load successfully in NWN:EE nwserver.
+
+MEME CREDITS
+------------
+  - Shargast Theme Song: https://suno.com/s/i89VuicOpAUTHVFZ
+
+LICENSES
+--------
+This distribution includes components under the following licenses:
+  - Mozilla Public License 2.0 (MPL-2.0): PRC8, Shargast_PRC8
+  - GNU General Public License v3 (GPL-3.0): xoreos, NWNX:EE
+  - See licenses/ directory for full license texts

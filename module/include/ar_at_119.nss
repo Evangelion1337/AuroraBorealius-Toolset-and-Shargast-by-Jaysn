@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName at_119
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 2/8/2003 5:57:00 AM
+//:://////////////////////////////////////////////
+void main()
+{
+    // Give the speaker the items
+    CreateItemOnObject("staffofmilamb001", GetPCSpeaker(), 1);
+
+    // Set the variables
+    SetLocalInt(GetPCSpeaker(), "arenabuy8", 1);
+
+}

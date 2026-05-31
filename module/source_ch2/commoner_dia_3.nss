@@ -1,0 +1,18 @@
+//::///////////////////////////////////////////////
+//:: commoner_dia_X (X from 1 to 10)
+//:://////////////////////////////////////////////
+/*
+     Check if dialog line is valid.
+*/
+//:://////////////////////////////////////////////
+//:: Created By: EntropyDecay
+//:: Created On: May 2003
+//:://////////////////////////////////////////////
+
+int StartingConditional()
+{
+    if(!(GetLocalInt(OBJECT_SELF, "ambience_dialog") == 3))
+        return FALSE;
+
+    return TRUE;
+}

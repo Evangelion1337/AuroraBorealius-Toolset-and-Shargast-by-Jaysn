@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName mm_palreject
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 27.05.2007 16:26:05
+//:://////////////////////////////////////////////
+int StartingConditional()
+{
+
+	// Restrict based on the player's alignment
+	if(GetAlignmentGoodEvil(GetPCSpeaker()) == ALIGNMENT_GOOD)
+		return FALSE;
+
+	return TRUE;
+}

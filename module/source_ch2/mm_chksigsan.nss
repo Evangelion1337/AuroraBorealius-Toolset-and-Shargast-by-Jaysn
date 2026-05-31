@@ -1,0 +1,18 @@
+//::///////////////////////////////////////////////
+//:: FileName mm_chksigsan
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 27.05.2007 17:08:43
+//:://////////////////////////////////////////////
+#include "nw_i0_tool"
+
+int StartingConditional()
+{
+
+	// Make sure the PC speaker has these items in their inventory
+	if(!HasItem(GetPCSpeaker(), "sig_san"))
+		return FALSE;
+
+	return TRUE;
+}

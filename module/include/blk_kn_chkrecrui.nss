@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName blk_kn_chkrecrui
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 13.05.2007 19:51:45
+//:://////////////////////////////////////////////
+int StartingConditional()
+{
+
+	// Restrict based on the player's alignment
+	if(GetAlignmentGoodEvil(GetPCSpeaker()) != ALIGNMENT_EVIL)
+		return FALSE;
+
+	return TRUE;
+}

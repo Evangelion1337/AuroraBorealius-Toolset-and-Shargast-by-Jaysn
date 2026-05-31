@@ -1,0 +1,18 @@
+//::///////////////////////////////////////////////
+//:: FileName sc_trollgem
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 8/23/2004 7:53:54 AM
+//:://////////////////////////////////////////////
+#include "nw_i0_tool"
+
+int StartingConditional()
+{
+
+	// Make sure the PC speaker has these items in their inventory
+	if(!HasItem(GetPCSpeaker(), "trollgem"))
+		return FALSE;
+
+	return TRUE;
+}

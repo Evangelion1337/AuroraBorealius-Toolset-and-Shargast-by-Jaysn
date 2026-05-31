@@ -1,0 +1,18 @@
+//::///////////////////////////////////////////////
+//:: FileName sc_017
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 02.08.2006 15:08:28
+//:://////////////////////////////////////////////
+#include "nw_i0_tool"
+
+int StartingConditional()
+{
+
+	// Make sure the PC speaker has these items in their inventory
+	if(!HasItem(GetPCSpeaker(), "SignetoftheTemplars"))
+		return FALSE;
+
+	return TRUE;
+}

@@ -1,0 +1,4 @@
+void main()
+{
+ExportSingleCharacter(GetPCSpeaker());
+}

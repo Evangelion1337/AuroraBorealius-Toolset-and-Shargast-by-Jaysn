@@ -1,0 +1,19 @@
+# Large binary files - see Releases for compiled .mod files
+*.mod
+
+# Rust build output
+toolset/target/
+
+# Windows binary
+toolset/nwnsc.exe
+
+# Mac files
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Lockfile backup
+toolset/Cargo.lock.bak

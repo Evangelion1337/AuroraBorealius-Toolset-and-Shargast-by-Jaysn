@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName bk_ch_aligne
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 13.05.2007 20:42:29
+//:://////////////////////////////////////////////
+int StartingConditional()
+{
+
+    // Restrict based on the player's alignment
+    if(GetAlignmentGoodEvil(GetPCSpeaker()) != ALIGNMENT_EVIL)
+        return FALSE;
+
+    return TRUE;
+}

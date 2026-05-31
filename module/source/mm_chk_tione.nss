@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName mm_chk_tione
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 26.05.2007 15:53:02
+//:://////////////////////////////////////////////
+int StartingConditional()
+{
+
+	// Restrict based on the player's alignment
+	if(GetAlignmentGoodEvil(GetPCSpeaker()) != ALIGNMENT_EVIL)
+		return FALSE;
+
+	return TRUE;
+}

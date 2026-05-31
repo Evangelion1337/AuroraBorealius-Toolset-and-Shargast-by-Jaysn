@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName bc_chk_alclsrest
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 14.05.2007 15:24:23
+//:://////////////////////////////////////////////
+int StartingConditional()
+{
+
+	// Restrict based on the player's alignment
+	if(GetAlignmentGoodEvil(GetPCSpeaker()) != ALIGNMENT_GOOD)
+		return FALSE;
+
+	return TRUE;
+}

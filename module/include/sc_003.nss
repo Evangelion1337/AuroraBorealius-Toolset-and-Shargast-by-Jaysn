@@ -1,0 +1,18 @@
+//::///////////////////////////////////////////////
+//:: FileName sc_003
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 9/5/2004 1:25:19 PM
+//:://////////////////////////////////////////////
+#include "nw_i0_tool"
+
+int StartingConditional()
+{
+
+	// Make sure the PC speaker has these items in their inventory
+	if(!HasItem(GetPCSpeaker(), "NW_IT_MSMLMISC17"))
+		return FALSE;
+
+	return TRUE;
+}

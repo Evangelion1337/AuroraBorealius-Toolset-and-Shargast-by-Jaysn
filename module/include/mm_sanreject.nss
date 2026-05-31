@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName mm_sanreject
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 27.05.2007 17:12:21
+//:://////////////////////////////////////////////
+int StartingConditional()
+{
+
+	// Restrict based on the player's alignment
+	if(GetAlignmentGoodEvil(GetPCSpeaker()) == ALIGNMENT_NEUTRAL)
+		return FALSE;
+
+	return TRUE;
+}

@@ -1,0 +1,19 @@
+//::///////////////////////////////////////////////
+//:: FileName sc_027
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 5/8/2005 12:52:59 PM
+//:://////////////////////////////////////////////
+#include "nw_i0_tool"
+
+int StartingConditional()
+{
+
+// Make sure the PC speaker has these items in their inventory
+ if(!HasItem(GetPCSpeaker(), "dwarfkey"))
+ return TRUE;
+
+return FALSE;
+}
+

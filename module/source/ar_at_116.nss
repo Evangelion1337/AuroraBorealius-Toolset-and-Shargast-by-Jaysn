@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName at_116
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 2/8/2003 5:55:21 AM
+//:://////////////////////////////////////////////
+void main()
+{
+    // Give the speaker the items
+    CreateItemOnObject("ringofthelefthan", GetPCSpeaker(), 1);
+
+    // Set the variables
+    SetLocalInt(GetPCSpeaker(), "arenabuy5", 1);
+
+}

@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName at_086
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 2/8/2003 5:53:42 AM
+//:://////////////////////////////////////////////
+void main()
+{
+    // Give the speaker the items
+    CreateItemOnObject("nw_it_mboots005", GetPCSpeaker(), 1);
+
+    // Set the variables
+    SetLocalInt(GetPCSpeaker(), "arenabuy3", 1);
+
+}

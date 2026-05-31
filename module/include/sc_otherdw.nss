@@ -1,0 +1,18 @@
+//::///////////////////////////////////////////////
+//:: FileName sc_otherdw
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 4/24/2005 11:45:09 AM
+//:://////////////////////////////////////////////
+#include "prc_inc_racial"
+
+int StartingConditional()
+{
+
+	// Reject player races
+	if(MyPRCGetRacialType(GetPCSpeaker()) == RACIAL_TYPE_DWARF)
+		return FALSE;
+
+	return TRUE;
+}

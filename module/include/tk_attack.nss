@@ -1,0 +1,24 @@
+//::///////////////////////////////////////////////
+//:: FileName tk_attack
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 14.05.2007 13:13:00
+//:://////////////////////////////////////////////
+
+#include "nw_i0_generic"
+void main()
+{
+
+object oPC = GetPCSpeaker();
+
+object oTarget;
+oTarget = OBJECT_SELF;
+
+SetIsTemporaryEnemy(oPC, oTarget);
+
+ActionAttack(oPC);
+
+DetermineCombatRound(oPC);
+
+}

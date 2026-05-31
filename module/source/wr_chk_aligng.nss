@@ -1,0 +1,16 @@
+//::///////////////////////////////////////////////
+//:: FileName wr_chk_aligng
+//:://////////////////////////////////////////////
+//:://////////////////////////////////////////////
+//:: Created By: Script Wizard
+//:: Created On: 13.05.2007 22:11:45
+//:://////////////////////////////////////////////
+int StartingConditional()
+{
+
+	// Restrict based on the player's alignment
+	if(GetAlignmentGoodEvil(GetPCSpeaker()) != ALIGNMENT_GOOD)
+		return FALSE;
+
+	return TRUE;
+}

@@ -1,0 +1,17 @@
+//::///////////////////////////////////////////////
+//:: General Treasure Spawn Script   Medium
+//:: Copyright (c) 2001 Bioware Corp.
+//:://////////////////////////////////////////////
+/*
+    Spawns in general purpose treasure, usable
+    by all classes.
+*/
+//:://////////////////////////////////////////////
+//:: Created By:   Brent
+//:: Created On:   February 26 2001
+//:://////////////////////////////////////////////
+
+void main()
+{
+    ExecuteScript("nw_o2_generalmed", OBJECT_SELF);
+}
