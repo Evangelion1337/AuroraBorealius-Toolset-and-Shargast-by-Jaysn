@@ -1,0 +1,12 @@
+[package]
+name = "nwn-gff"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+nwn-lib-rs = { version = "0.4", default-features = false }
+nom = "7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"

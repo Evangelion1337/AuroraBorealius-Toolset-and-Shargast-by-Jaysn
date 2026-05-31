@@ -1,0 +1,11 @@
+[package]
+name = "nevererf"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+nwn-lib-rs = { version = "0.4", default-features = false }
+nwn-erf = { path = "../nwn-erf" }
+nwn-gamemodel = { path = "../nwn-gamemodel" }

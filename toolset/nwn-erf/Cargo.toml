@@ -1,0 +1,10 @@
+[package]
+name = "nwn-erf"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+nwn-lib-rs = { version = "0.4", default-features = false }
+chrono = "0.4"
+thiserror = "2"

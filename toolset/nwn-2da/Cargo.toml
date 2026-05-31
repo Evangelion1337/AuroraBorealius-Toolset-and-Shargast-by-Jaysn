@@ -1,0 +1,9 @@
+[package]
+name = "nwn-2da"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+nwn-lib-rs = { version = "0.4", default-features = false }
+thiserror = "2"

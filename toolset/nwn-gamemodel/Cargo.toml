@@ -1,0 +1,18 @@
+[package]
+name = "nwn-gamemodel"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+nwnrs-types = { version = "0.0.1", default-features = false, features = ["set"] }
+nwn-lib-rs = { version = "0.4", default-features = false }
+nwn-gff = { path = "../nwn-gff" }
+nwn-erf = { path = "../nwn-erf" }
+nwn-tlk = { path = "../nwn-tlk" }
+nwn-2da = { path = "../nwn-2da" }
+nwn-tileset = { path = "../nwn-tileset" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+rayon = "1"

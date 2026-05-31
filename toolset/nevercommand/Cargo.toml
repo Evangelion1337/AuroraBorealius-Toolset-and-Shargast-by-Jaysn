@@ -1,0 +1,14 @@
+[package]
+name = "nevercommand"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde_json = "1"
+nwn-lib-rs = { version = "0.4", default-features = false }
+nwn-gamemodel = { path = "../nwn-gamemodel" }
+nwn-erf = { path = "../nwn-erf" }
+nwn-gff = { path = "../nwn-gff" }
+nwn-tlk = { path = "../nwn-tlk" }

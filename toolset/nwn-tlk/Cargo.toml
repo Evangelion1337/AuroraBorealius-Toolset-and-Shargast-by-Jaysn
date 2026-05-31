@@ -1,0 +1,10 @@
+[package]
+name = "nwn-tlk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+nwn-lib-rs = { version = "0.4", default-features = false }
+nom = "7"
+thiserror = "2"

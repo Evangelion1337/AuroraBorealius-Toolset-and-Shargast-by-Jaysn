@@ -1,0 +1,40 @@
+[package]
+name = "aurora-borealis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "wgpu", "glow", "accesskit"] }
+rfd = "0.15"
+nwn-lib-rs = { version = "0.4", default-features = false }
+nwn-gff = { path = "../nwn-gff" }
+nwn-erf = { path = "../nwn-erf" }
+nwn-gamemodel = { path = "../nwn-gamemodel" }
+nwn-tlk = { path = "../nwn-tlk" }
+nwn-script = { path = "../nwn-script" }
+nwn-2da = { path = "../nwn-2da" }
+nwn-tileset = { path = "../nwn-tileset" }
+nwn-3d = { path = "../nwn-3d" }
+nwnrs-types = { version = "0.0.1", default-features = false, features = ["set", "key", "mdl", "dds", "tga", "plt", "checksums", "compressedbuf", "nwsync"] }
+image = "0.25"
+rodio = { version = "0.20", features = ["mp3"] }
+egui-wgpu = "0.31"
+wgpu = "24"
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+rayon = "1"
+anyhow = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "fs", "process", "sync"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "wgpu", "glow", "accesskit", "x11", "wayland"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["HtmlCanvasElement"] }
+log = "0.4"

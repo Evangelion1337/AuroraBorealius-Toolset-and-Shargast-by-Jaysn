@@ -1,0 +1,16 @@
+[package]
+name = "nwn-3d"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+wgpu = "24"
+egui = "0.31"
+egui-wgpu = "0.31"
+nwn-gamemodel = { path = "../nwn-gamemodel" }
+nwn-tileset = { path = "../nwn-tileset" }
+bytemuck = { version = "1", features = ["derive"] }
+rayon = "1"
+nwnrs-types = { version = "0.0.1", default-features = false, features = ["set", "key", "mdl", "dds", "tga", "plt", "checksums", "compressedbuf"] }
+nwn-erf = { path = "../nwn-erf" }
