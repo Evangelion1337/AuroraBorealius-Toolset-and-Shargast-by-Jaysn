@@ -57,13 +57,13 @@ fn main() {
     }
 }
 
-fn verify_list(
+fn verify_list<T: Coorded>(
     root: &nwn_gff::Struct, 
-    loaded: &[impl Coorded],
+    loaded: &[T],
     _creatures: &[nwn_gamemodel::CreatureInstance],
     list_name: &str, 
     label: &str,
-    get_coords: fn(&impl Coorded) -> (f32, f32, f32),
+    get_coords: fn(&T) -> (f32, f32, f32),
 ) {
     let raw_list = root.find(list_name)
         .and_then(|v| if let FieldValue::List(l) = v { Some(l) } else { None });
