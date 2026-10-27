@@ -3,7 +3,9 @@ use nwn_3d::tile_renderer;
 use nwn_3d::camera::OrbitCamera;
 
 fn main() {
-    let path = "/home/grimshackle/Documents/Neverwinter Nights/modules/HOPE_Shargast_CH1.mod";
+    let path = std::env::args()
+        .nth(1)
+        .expect("Usage: cargo run -p nwn-3d --example test_math -- <module.mod>");
     eprintln!("Loading module: {}", path);
     let module = nwn_gamemodel::Module::open(path).expect("Failed to open module");
     let area_names = module.area_names();
@@ -22,9 +24,14 @@ fn main() {
 
         // Build mesh data (no GPU needed)
         let mesh = tile_renderer::build_tile_mesh(&area);
-        let markers = tile_renderer::build_object_markers(&area);
+        let model_cache = tile_renderer::ModelCache::new();
+        let markers = tile_renderer::build_object_markers(
+            &area,
+            tile_renderer::VisibilityFilter::default(),
+            &model_cache,
+        );
         eprintln!("Tile mesh: {} vertices, {} indices", mesh.vertices.len(), mesh.indices.len());
-        eprintln!("Markers: {} vertices, {} indices", markers.vertices.len(), markers.indices.len());
+        eprintln!("Markers: {} vertices, {} indices", markers.mesh.vertices.len(), markers.mesh.indices.len());
 
         // If no mesh data, skip
         if mesh.vertices.is_empty() {
@@ -60,9 +67,9 @@ fn main() {
         }
 
         // Test a marker vertex if any
-        if !markers.vertices.is_empty() {
+        if !markers.mesh.vertices.is_empty() {
             let idx = 0;
-            let v = &markers.vertices[idx];
+            let v = &markers.mesh.vertices[idx];
             let wpos = [v.position[0], v.position[1], v.position[2], 1.0f32];
             let clip = gpu_transform(vp, wpos);
             let ndc = [clip[0] / clip[3], clip[1] / clip[3], clip[2] / clip[3], clip[3]];

@@ -10,8 +10,10 @@ fn mat4_mul(a: [[f32; 4]; 4], b: [[f32; 4]; 4]) -> [[f32; 4]; 4] {
 }
 
 fn main() {
-    let path = "/home/grimshackle/Documents/Neverwinter Nights/modules/HOPE_Shargast_CH1.mod";
-    let module = nwn_gamemodel::Module::open(path).expect("open module");
+    let path = std::env::args()
+        .nth(1)
+        .expect("Usage: cargo run -p nwn-3d --example diagnose -- <module.mod>");
+    let module = nwn_gamemodel::Module::open(&path).expect("open module");
     let names = module.area_names();
     eprintln!("Module: {} areas", names.len());
 
@@ -34,34 +36,66 @@ fn main() {
 
     // Build MDL tile mesh groups
     let mut cache = nwn_3d::tile_renderer::ModelCache::new();
-    let groups = nwn_3d::tile_renderer::build_tiles_grouped(&area, &mut cache);
-    eprintln!("Tile groups: {}", groups.len());
+    let tiles = nwn_3d::tile_renderer::build_instanced_tiles(&area, &mut cache);
+    let groups = tiles.models;
+    eprintln!("Tile model groups: {}", groups.len());
     for g in &groups {
         let tex = g.texture_name.as_deref().unwrap_or("(none)");
         eprintln!("  group '{}': {} verts, {} tris", tex, g.data.vertices.len(), g.data.indices.len() / 3);
     }
 
-    // Merge groups for diagnostic checks
+    // Expand model instances into world-space geometry for diagnostics.
     let mesh = {
         let mut verts = Vec::new();
         let mut idxs = Vec::new();
-        for g in &groups {
-            let base = verts.len() as u32;
-            verts.extend_from_slice(&g.data.vertices);
-            for i in &g.data.indices {
-                idxs.push(base + i);
+
+        for (group, instances) in groups.iter().zip(&tiles.instance_data) {
+            for transform in instances {
+                let base = verts.len() as u32;
+
+                for vertex in &group.data.vertices {
+                    let mut v = *vertex;
+                    let [x, y, z] = v.position;
+
+                    v.position = [
+                        transform.row0[0] * x
+                            + transform.row1[0] * y
+                            + transform.row2[0] * z
+                            + transform.row3[0],
+                        transform.row0[1] * x
+                            + transform.row1[1] * y
+                            + transform.row2[1] * z
+                            + transform.row3[1],
+                        transform.row0[2] * x
+                            + transform.row1[2] * y
+                            + transform.row2[2] * z
+                            + transform.row3[2],
+                    ];
+
+                    verts.push(v);
+                }
+
+                idxs.extend(group.data.indices.iter().map(|i| base + i));
             }
         }
-        nwn_3d::tile_renderer::MeshData { vertices: verts, indices: idxs }
+
+        nwn_3d::tile_renderer::MeshData {
+            vertices: verts,
+            indices: idxs,
+        }
     };
 
-    // Print first few vertices to check values
-    for i in 0..mesh.vertices.len().min(5) {
-        let v = &mesh.vertices[i];
-        eprintln!("  v[{}]: pos=({:.2},{:.2},{:.2}) norm=({:.3},{:.3},{:.3}) color=({:.2},{:.2},{:.2})",
-            i, v.position[0], v.position[1], v.position[2],
-            v.normal[0], v.normal[1], v.normal[2],
-            v.color[0], v.color[1], v.color[2]);
+    eprintln!(
+        "World-space mesh: {} vertices, {} triangles",
+        mesh.vertices.len(),
+        mesh.indices.len() / 3
+    );
+
+    for (i, v) in mesh.vertices.iter().take(5).enumerate() {
+        eprintln!(
+            "  v[{}]: pos=({:.2},{:.2},{:.2})",
+            i, v.position[0], v.position[1], v.position[2]
+        );
     }
 
     // Camera setup
@@ -84,11 +118,11 @@ fn main() {
         let v = &mesh.vertices[i];
         let wpos = [v.position[0], v.position[1], v.position[2], 1.0f32];
 
-        // Simulate WGSL: result[r] = sum_c vp[r][c] * v[c]
+        // Match WGSL's column-major matrix interpretation.
         let mut clip = [0.0f32; 4];
         for r in 0..4 {
             for c in 0..4 {
-                clip[r] += vp[r][c] * wpos[c];
+                clip[r] += vp[c][r] * wpos[c];
             }
         }
 
@@ -96,7 +130,7 @@ fn main() {
         let visible = ndc_w > 0.0
             && clip[0].abs() <= ndc_w
             && clip[1].abs() <= ndc_w
-            && clip[2].abs() <= ndc_w;
+            && clip[2] >= 0.0 && clip[2] <= ndc_w;
         if visible { visible_count += 1; }
 
         if i < 5 || visible {
