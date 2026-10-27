@@ -101,10 +101,10 @@ impl OrbitCamera {
         if view_w <= 0.0 || view_h <= 0.0 { return None; }
         let vp = mat4_mul(self.view_matrix(), self.projection_matrix());
         let mut clip = [
-            vp[0][0] * world[0] + vp[0][1] * world[1] + vp[0][2] * world[2] + vp[0][3],
-            vp[1][0] * world[0] + vp[1][1] * world[1] + vp[1][2] * world[2] + vp[1][3],
-            vp[2][0] * world[0] + vp[2][1] * world[1] + vp[2][2] * world[2] + vp[2][3],
-            vp[3][0] * world[0] + vp[3][1] * world[1] + vp[3][2] * world[2] + vp[3][3],
+            vp[0][0] * world[0] + vp[1][0] * world[1] + vp[2][0] * world[2] + vp[3][0],
+            vp[0][1] * world[0] + vp[1][1] * world[1] + vp[2][1] * world[2] + vp[3][1],
+            vp[0][2] * world[0] + vp[1][2] * world[1] + vp[2][2] * world[2] + vp[3][2],
+            vp[0][3] * world[0] + vp[1][3] * world[1] + vp[2][3] * world[2] + vp[3][3],
         ];
         if clip[3].abs() < 1e-15 { return None; }
         let inv_w = 1.0 / clip[3];
@@ -232,4 +232,62 @@ fn transform_vec4(m: &[[f32; 4]; 4], v: [f32; 4]) -> [f32; 4] {
         m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2] + m[2][3] * v[3],
         m[3][0] * v[0] + m[3][1] * v[1] + m[3][2] * v[2] + m[3][3] * v[3],
     ]
+}
+
+#[cfg(test)]
+mod camera_projection_tests {
+    use super::*;
+
+    fn assert_near(actual: f32, expected: f32) {
+        assert!(
+            (actual - expected).abs() < 0.01,
+            "expected {expected}, got {actual}"
+        );
+    }
+
+    #[test]
+    fn target_projects_to_viewport_center() {
+        let mut camera = OrbitCamera::new(4.0, 3.0);
+        camera.aspect = 800.0 / 600.0;
+
+        let point = camera
+            .world_to_screen(camera.target, 800.0, 600.0)
+            .expect("camera target should project");
+
+        assert_near(point[0], 400.0);
+        assert_near(point[1], 300.0);
+    }
+
+    #[test]
+    fn right_and_up_project_in_expected_directions() {
+        let mut camera = OrbitCamera::new(4.0, 3.0);
+        camera.aspect = 800.0 / 600.0;
+
+        let (right, up) = camera.right_up();
+
+        let right_point = [
+            camera.target[0] + right[0],
+            camera.target[1] + right[1],
+            camera.target[2] + right[2],
+        ];
+        let up_point = [
+            camera.target[0] + up[0],
+            camera.target[1] + up[1],
+            camera.target[2] + up[2],
+        ];
+
+        let right_screen = camera
+            .world_to_screen(right_point, 800.0, 600.0)
+            .unwrap();
+
+        let up_screen = camera
+            .world_to_screen(up_point, 800.0, 600.0)
+            .unwrap();
+
+        assert!(right_screen[0] > 400.0);
+        assert_near(right_screen[1], 300.0);
+
+        assert!(up_screen[1] < 300.0);
+        assert_near(up_screen[0], 400.0);
+    }
 }
