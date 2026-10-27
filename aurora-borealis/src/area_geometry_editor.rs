@@ -42,11 +42,11 @@ fn draw_grid(painter: &egui::Painter, rect: Rect, to_screen: &dyn Fn(f32, f32) -
     let end_wy = (-(top - rect.center().y) / zoom + rect.height() / 2.0 / grid_size).ceil() as i32 + 1;
     for gx in start_wx..=end_wx {
         let p = to_screen(gx as f32 * grid_size, 0.0);
-        painter.line_segment([Pos2::new(p.x, top), Pos2::new(p.x, bottom)], Stroke::new(0.5, Color32::from_gray(50)));
+        painter.line_segment([Pos2::new(p.x, top), Pos2::new(p.x, bottom)], Stroke::new(0.5_f32, Color32::from_gray(50)));
     }
     for gy in start_wy..=end_wy {
         let p = to_screen(0.0, gy as f32 * grid_size);
-        painter.line_segment([Pos2::new(left, p.y), Pos2::new(right, p.y)], Stroke::new(0.5, Color32::from_gray(50)));
+        painter.line_segment([Pos2::new(left, p.y), Pos2::new(right, p.y)], Stroke::new(0.5_f32, Color32::from_gray(50)));
     }
 }
 
@@ -127,21 +127,21 @@ pub fn show_geometry_editor(state: &mut GeometryEditorState, ctx: &egui::Context
                             let color = if is_sel { Color32::WHITE } else { Color32::GREEN };
                             painter.circle_filled(sp, if is_sel { 6.0 } else { 4.0 }, color);
                             if is_sel {
-                                painter.circle_stroke(sp, 8.0, Stroke::new(2.0, Color32::WHITE));
+                                painter.circle_stroke(sp, 8.0, Stroke::new(2.0_f32, Color32::WHITE));
                                 if !t.geometry.is_empty() {
                                     let pts: Vec<Pos2> = t.geometry.iter().map(|pt| to_screen(pt[0], pt[1])).collect();
                                     if pts.len() >= 3 {
-                                        painter.add(Shape::convex_polygon(pts.clone(), Color32::from_rgba_premultiplied(0, 255, 0, 60), Stroke::new(2.0, Color32::GREEN)));
+                                        painter.add(Shape::convex_polygon(pts.clone(), Color32::from_rgba_premultiplied(0, 255, 0, 60), Stroke::new(2.0_f32, Color32::GREEN)));
                                     } else {
                                         for pair in pts.windows(2) {
-                                            painter.line_segment([pair[0], pair[1]], Stroke::new(2.0, Color32::GREEN));
+                                            painter.line_segment([pair[0], pair[1]], Stroke::new(2.0_f32, Color32::GREEN));
                                         }
                                     }
                                     for (vi, pt) in t.geometry.iter().enumerate() {
                                         let vp = to_screen(pt[0], pt[1]);
                                         let vsel = state.selected_vertex == Some(vi);
                                         painter.circle_filled(vp, if vsel { 5.0 } else { 3.5 }, Color32::YELLOW);
-                                        painter.circle_stroke(vp, if vsel { 7.0 } else { 5.0 }, Stroke::new(1.0, Color32::WHITE));
+                                        painter.circle_stroke(vp, if vsel { 7.0 } else { 5.0 }, Stroke::new(1.0_f32, Color32::WHITE));
                                     }
                                 }
                             }
@@ -154,21 +154,21 @@ pub fn show_geometry_editor(state: &mut GeometryEditorState, ctx: &egui::Context
                             let color = if is_sel { Color32::WHITE } else { Color32::from_rgb(255, 128, 0) };
                             painter.circle_filled(sp, if is_sel { 6.0 } else { 4.0 }, color);
                             if is_sel {
-                                painter.circle_stroke(sp, 8.0, Stroke::new(2.0, Color32::WHITE));
+                                painter.circle_stroke(sp, 8.0, Stroke::new(2.0_f32, Color32::WHITE));
                                 if !e.geometry.is_empty() {
                                     let pts: Vec<Pos2> = e.geometry.iter().map(|pt| to_screen(pt[0], pt[1])).collect();
                                     if pts.len() >= 3 {
-                                        painter.add(Shape::convex_polygon(pts.clone(), Color32::from_rgba_premultiplied(255, 128, 0, 60), Stroke::new(2.0, Color32::from_rgb(255, 128, 0))));
+                                        painter.add(Shape::convex_polygon(pts.clone(), Color32::from_rgba_premultiplied(255, 128, 0, 60), Stroke::new(2.0_f32, Color32::from_rgb(255, 128, 0))));
                                     } else {
                                         for pair in pts.windows(2) {
-                                            painter.line_segment([pair[0], pair[1]], Stroke::new(2.0, Color32::from_rgb(255, 128, 0)));
+                                            painter.line_segment([pair[0], pair[1]], Stroke::new(2.0_f32, Color32::from_rgb(255, 128, 0)));
                                         }
                                     }
                                     for (vi, pt) in e.geometry.iter().enumerate() {
                                         let vp = to_screen(pt[0], pt[1]);
                                         let vsel = state.selected_vertex == Some(vi);
                                         painter.circle_filled(vp, if vsel { 5.0 } else { 3.5 }, Color32::YELLOW);
-                                        painter.circle_stroke(vp, if vsel { 7.0 } else { 5.0 }, Stroke::new(1.0, Color32::WHITE));
+                                        painter.circle_stroke(vp, if vsel { 7.0 } else { 5.0 }, Stroke::new(1.0_f32, Color32::WHITE));
                                     }
                                 }
                             }

@@ -2384,9 +2384,9 @@ let prefer_user_include = ["x0_i0_spawncond", "x3_inc_horse", "x2_inc_compon", "
                                 // Highlight selected tile
                                 if let Some((sel_col, sel_row)) = self.selected_tile {
                                     let is_sel = sel_row == row as usize && sel_col == col as usize;
-                                    painter.rect_stroke(t_rect, 0.0, egui::Stroke::new(if is_sel { 3.0 } else { 0.5 }, if is_sel { egui::Color32::GREEN } else { egui::Color32::from_gray(60) }), egui::StrokeKind::Outside);
+                                    painter.rect_stroke(t_rect, 0.0, egui::Stroke::new(if is_sel { 3.0 } else { 0.5_f32 }, if is_sel { egui::Color32::GREEN } else { egui::Color32::from_gray(60) }), egui::StrokeKind::Outside);
                                 } else {
-                                    painter.rect_stroke(t_rect, 0.0, egui::Stroke::new(0.5, egui::Color32::from_gray(60)), egui::StrokeKind::Outside);
+                                    painter.rect_stroke(t_rect, 0.0, egui::Stroke::new(0.5_f32, egui::Color32::from_gray(60)), egui::StrokeKind::Outside);
                                 }
                             }
                         }
@@ -2401,7 +2401,7 @@ let prefer_user_include = ["x0_i0_spawncond", "x3_inc_horse", "x2_inc_compon", "
                                     let fill = if is_sel { egui::Color32::WHITE } else { $color };
                                     painter.circle_filled(sp, radius, fill);
                                     if is_sel {
-                                        painter.circle_stroke(sp, radius + 2.0, egui::Stroke::new(2.0, egui::Color32::WHITE));
+                                        painter.circle_stroke(sp, radius + 2.0, egui::Stroke::new(2.0_f32, egui::Color32::WHITE));
                                     }
                                     if zoom > 12.0 {
                                         let label_pos = egui::pos2(sp.x + 6.0, sp.y - 4.0);
@@ -2625,7 +2625,7 @@ let prefer_user_include = ["x0_i0_spawncond", "x3_inc_horse", "x2_inc_compon", "
                                 let p1 = to_screen((col + 1) as f32, (row + 1) as f32);
                                 let t_rect = egui::Rect::from_min_max(p0, p1);
                                 painter.rect_filled(t_rect, 0.0, egui::Color32::from_rgb(r, g, b));
-                                painter.rect_stroke(t_rect, 0.0, egui::Stroke::new(0.5, egui::Color32::from_gray(40)), egui::StrokeKind::Outside);
+                                painter.rect_stroke(t_rect, 0.0, egui::Stroke::new(0.5_f32, egui::Color32::from_gray(40)), egui::StrokeKind::Outside);
                                 if hms.show_heights && zoom > 8.0 {
                                     let center = t_rect.center();
                                     painter.text(center, egui::Align2::CENTER_CENTER, &format!("{}", height), egui::FontId::proportional(8.0), egui::Color32::WHITE);
@@ -4706,11 +4706,11 @@ let prefer_user_include = ["x0_i0_spawncond", "x3_inc_horse", "x2_inc_compon", "
                     let painter = egui::Painter::new(ui.ctx().clone(), ghost_layer_id, rect);
                     painter.line_segment(
                         [ghost_pos - egui::vec2(10.0, 0.0), ghost_pos + egui::vec2(10.0, 0.0)],
-                        egui::Stroke::new(2.0, egui::Color32::YELLOW),
+                        egui::Stroke::new(2.0_f32, egui::Color32::YELLOW),
                     );
                     painter.line_segment(
                         [ghost_pos - egui::vec2(0.0, 10.0), ghost_pos + egui::vec2(0.0, 10.0)],
-                        egui::Stroke::new(2.0, egui::Color32::YELLOW),
+                        egui::Stroke::new(2.0_f32, egui::Color32::YELLOW),
                     );
                     if let PlacementState::Pending(ref typ, ref resref) = self.placement_state {
                         painter.text(
@@ -4732,7 +4732,7 @@ let prefer_user_include = ["x0_i0_spawncond", "x3_inc_horse", "x2_inc_compon", "
                         let min = egui::pos2(start.x.min(end.x), start.y.min(end.y));
                         let max = egui::pos2(start.x.max(end.x), start.y.max(end.y));
                         let fill = egui::Color32::from_rgba_premultiplied(100, 150, 255, 40);
-                        let stroke = egui::Stroke::new(1.5, egui::Color32::from_rgb(100, 150, 255));
+                        let stroke = egui::Stroke::new(1.5_f32, egui::Color32::from_rgb(100, 150, 255));
                         painter.rect(egui::Rect::from_min_max(min, max), 0.0, fill, stroke, egui::StrokeKind::Inside);
                     }
                 }
@@ -4745,10 +4745,10 @@ let prefer_user_include = ["x0_i0_spawncond", "x3_inc_horse", "x2_inc_compon", "
                     let size = 10.0;
                     let gap = 3.0;
                     let color = egui::Color32::WHITE;
-                    rp.line_segment([egui::pos2(cx, cy - gap - size), egui::pos2(cx, cy - gap)], egui::Stroke::new(1.5, color));
-                    rp.line_segment([egui::pos2(cx, cy + gap), egui::pos2(cx, cy + gap + size)], egui::Stroke::new(1.5, color));
-                    rp.line_segment([egui::pos2(cx - gap - size, cy), egui::pos2(cx - gap, cy)], egui::Stroke::new(1.5, color));
-                    rp.line_segment([egui::pos2(cx + gap, cy), egui::pos2(cx + gap + size, cy)], egui::Stroke::new(1.5, color));
+                    rp.line_segment([egui::pos2(cx, cy - gap - size), egui::pos2(cx, cy - gap)], egui::Stroke::new(1.5_f32, color));
+                    rp.line_segment([egui::pos2(cx, cy + gap), egui::pos2(cx, cy + gap + size)], egui::Stroke::new(1.5_f32, color));
+                    rp.line_segment([egui::pos2(cx - gap - size, cy), egui::pos2(cx - gap, cy)], egui::Stroke::new(1.5_f32, color));
+                    rp.line_segment([egui::pos2(cx + gap, cy), egui::pos2(cx + gap + size, cy)], egui::Stroke::new(1.5_f32, color));
                 }
             } else if self.module.is_some() {
                 ui.heading("Select an area from the navigator");

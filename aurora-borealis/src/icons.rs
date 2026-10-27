@@ -137,7 +137,7 @@ impl Icons {
         };
         painter.rect_filled(rect, 3.0, bg);
         if resp.hovered() {
-            painter.rect_stroke(rect, 3.0, egui::Stroke::new(1.0, egui::Color32::from_rgb(120, 170, 255)), egui::StrokeKind::Inside);
+            painter.rect_stroke(rect, 3.0, egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(120, 170, 255)), egui::StrokeKind::Inside);
         }
         painter.text(egui::pos2(rect.min.x + 6.0, rect.center().y), egui::Align2::LEFT_CENTER, label, font_id, egui::Color32::WHITE);
         if let Some(tex) = self.get(icon) {
