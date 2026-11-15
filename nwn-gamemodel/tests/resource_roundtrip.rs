@@ -111,3 +111,62 @@ fn missing_area_does_not_truncate_existing_destination() {
     assert!(result.is_err(), "Missing ARE data must fail explicitly");
     assert_eq!(actual, original);
 }
+
+fn saved_ifo(module: &mut Module) -> Vec<u8> {
+    let unique = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+    let path = std::env::temp_dir().join(format!(
+        "aurora-ifo-{}-{unique}.mod", std::process::id()
+    ));
+    module.save_to(&path).expect("Save synthetic module");
+    let result = ErfFile::open(&path).unwrap().get("module", resource_types::IFO).unwrap();
+    std::fs::remove_file(path).unwrap();
+    result
+}
+
+fn with_archived_ifo(module: &mut Module) -> Vec<u8> {
+    let bytes = module.ifo.to_bytes();
+    let mut original = ErfFile::new("MOD ", true, None);
+    original.add_resource("module", resource_types::IFO, bytes.clone());
+    module.erf = Some(ErfFile::from_bytes(&original.to_bytes().unwrap()).unwrap());
+    bytes
+}
+
+#[test]
+fn unchanged_ifo_is_preserved_byte_for_byte() {
+    let mut module = Module::new("Original metadata");
+    let expected = with_archived_ifo(&mut module);
+    assert_eq!(saved_ifo(&mut module), expected);
+    assert!(module.ifo.root().find("Mod_OnPlayerEnter").is_none());
+}
+
+#[test]
+fn localized_name_edit_preserves_other_languages_and_strref() {
+    let mut module = Module::new("Original English");
+    *module.ifo.root_mut().find_mut("Mod_Name").unwrap() =
+        nwn_gff::FieldValue::LocString(nwn_lib_rs::gff::LocString {
+            strref: 123,
+            strings: vec![(0, "Original English".to_owned()), (2, "Autre nom".to_owned())],
+        });
+    with_archived_ifo(&mut module);
+    module.name = "Changed English".to_owned();
+    let saved = nwn_gff::GffFile::from_bytes(&saved_ifo(&mut module)).unwrap();
+    let (strref, strings) = saved.get_locstring("Mod_Name").unwrap();
+    assert_eq!(strref, 123);
+    assert_eq!(strings, vec![(0, "Changed English".to_owned()), (2, "Autre nom".to_owned())]);
+}
+
+#[test]
+fn localized_name_edit_adds_missing_english_without_removing_translation() {
+    let mut module = Module::new("Autre nom");
+    *module.ifo.root_mut().find_mut("Mod_Name").unwrap() =
+        nwn_gff::FieldValue::LocString(nwn_lib_rs::gff::LocString {
+            strref: u32::MAX,
+            strings: vec![(2, "Autre nom".to_owned())],
+        });
+    with_archived_ifo(&mut module);
+    module.name = "Added English".to_owned();
+    let saved = nwn_gff::GffFile::from_bytes(&saved_ifo(&mut module)).unwrap();
+    let (_, strings) = saved.get_locstring("Mod_Name").unwrap();
+    assert_eq!(strings, vec![(2, "Autre nom".to_owned()), (0, "Added English".to_owned())]);
+}
