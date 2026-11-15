@@ -170,3 +170,68 @@ fn localized_name_edit_adds_missing_english_without_removing_translation() {
     let (_, strings) = saved.get_locstring("Mod_Name").unwrap();
     assert_eq!(strings, vec![(2, "Autre nom".to_owned()), (0, "Added English".to_owned())]);
 }
+
+fn reopen_ifo(bytes: Vec<u8>) -> Module {
+    let mut archive = ErfFile::new("MOD ", true, None);
+    archive.add_resource("module", resource_types::IFO, bytes);
+    Module::from_erf(std::path::PathBuf::from("synthetic.mod"), archive).unwrap()
+}
+
+#[test]
+fn unrelated_metadata_edit_preserves_translation_order_and_contents() {
+    for strings in [
+        vec![(2, "Autre nom".to_owned()), (0, "English name".to_owned())],
+        vec![(2, "Autre nom".to_owned())],
+    ] {
+        let mut initial = Module::new("Temporary");
+        *initial.ifo.root_mut().find_mut("Mod_Name").unwrap() =
+            nwn_gff::FieldValue::LocString(nwn_lib_rs::gff::LocString {
+                strref: 123, strings: strings.clone(),
+            });
+        let mut module = reopen_ifo(initial.ifo.to_bytes());
+        let expected_name = if strings.len() == 2 { "English name" } else { "Autre nom" };
+        assert_eq!(module.name, expected_name);
+        module.tag = "Changed tag".to_owned();
+        let saved = nwn_gff::GffFile::from_bytes(&saved_ifo(&mut module)).unwrap();
+        assert_eq!(saved.get_locstring("Mod_Name").unwrap(), (123, strings));
+        assert_eq!(saved.get_string("Mod_Tag").unwrap(), "Changed tag");
+    }
+}
+
+#[test]
+fn added_english_name_survives_reopen_and_second_save() {
+    let mut initial = Module::new("Temporary");
+    *initial.ifo.root_mut().find_mut("Mod_Name").unwrap() =
+        nwn_gff::FieldValue::LocString(nwn_lib_rs::gff::LocString {
+            strref: u32::MAX, strings: vec![(2, "Autre nom".to_owned())],
+        });
+    let mut module = reopen_ifo(initial.ifo.to_bytes());
+    module.name = "New English".to_owned();
+    let first_save = saved_ifo(&mut module);
+    let mut reopened = reopen_ifo(first_save.clone());
+    assert_eq!(reopened.name, "New English");
+    assert_eq!(saved_ifo(&mut reopened), first_save);
+}
+
+#[cfg(unix)]
+#[test]
+fn symlink_destination_is_rejected_without_changing_link_or_target() {
+    let unique = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+    let directory = std::env::temp_dir().join(format!(
+        "aurora-symlink-{}-{unique}", std::process::id()
+    ));
+    std::fs::create_dir(&directory).unwrap();
+    let target = directory.join("original.mod");
+    let link = directory.join("linked.mod");
+    let original = b"Do not replace this original";
+    std::fs::write(&target, original).unwrap();
+    std::os::unix::fs::symlink(&target, &link).unwrap();
+    let result = Module::new("Rejected save").save_to(&link);
+    assert!(result.is_err());
+    assert_eq!(std::fs::read_link(&link).unwrap(), target);
+    assert_eq!(std::fs::read(&target).unwrap(), original);
+    std::fs::remove_file(link).unwrap();
+    std::fs::remove_file(target).unwrap();
+    std::fs::remove_dir(directory).unwrap();
+}

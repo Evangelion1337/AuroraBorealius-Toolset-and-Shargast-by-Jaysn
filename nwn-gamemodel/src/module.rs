@@ -201,7 +201,7 @@ impl Module {
             .ok_or_else(|| ModelError::NotFound("module.ifo in MOD".into()))?;
         let ifo = nwn_gff::GffFile::from_bytes(&ifo_data)?;
 
-        let name = ifo.get_string("Mod_Name").unwrap_or_default();
+        let name = module_name(&ifo);
         let description = ifo.get_string("Mod_Description").unwrap_or_default();
         let entry_area = ifo.get_string("Mod_Entry_Area").unwrap_or_default();
         let on_player_enter = ifo.get_string("Mod_OnPlayerEnter").unwrap_or_default();
@@ -1450,6 +1450,14 @@ impl Module {
     }
 
     pub fn save_to(&mut self, path: &Path) -> Result<()> {
+        // Replacing a symlink would discard the link rather than update its
+        // target. Require callers to choose a real destination explicitly.
+        if std::fs::symlink_metadata(path)
+            .map(|metadata| metadata.file_type().is_symlink())
+            .unwrap_or(false)
+        {
+            return Err(ModelError::Format("Refusing to replace a symlink destination".into()));
+        }
         let path = path.to_path_buf();
         let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
         // nwn_lib_rs 0.4.0 to_bytes_head always writes 16-byte resrefs regardless
@@ -1471,36 +1479,42 @@ impl Module {
             nwn_gff::GffFile::from_bytes(bytes).ok()
         }).is_some_and(|original| {
             original.to_bytes() == self.ifo.to_bytes()
-                && original.get_string("Mod_Name").unwrap_or_default() == self.name
+                && module_name(&original) == self.name
                 && original.get_string("Mod_Description").unwrap_or_default() == self.description
                 && original.get_string("Mod_Entry_Area").unwrap_or_default() == self.entry_area
                 && original.get_string("Mod_Tag").unwrap_or_default() == self.tag
                 && original.get_string("Mod_OnPlayerEnter").unwrap_or_default() == self.on_player_enter
         });
 
+        let name_changed = original_ifo.as_ref()
+            .and_then(|bytes| nwn_gff::GffFile::from_bytes(bytes).ok())
+            .map_or(true, |original| module_name(&original) != self.name);
+
         if !preserve_original_ifo {
             // Apply intended metadata edits only when the IFO changed.
             let ifo_struct = self.ifo.root_mut();
-            if let Some(name_field) = ifo_struct.find_mut("Mod_Name") {
-                match name_field {
-                    nwn_lib_rs::gff::FieldValue::String(s) => {
-                        *s = self.name.clone();
-                    }
-                    nwn_lib_rs::gff::FieldValue::LocString(ls) => {
-                        // Update the English entry without overwriting
-                        // translations for other language identifiers.
-                        if let Some((_, text)) = ls.strings.iter_mut()
-                            .find(|(language, _)| *language == 0)
-                        {
-                            *text = self.name.clone();
-                        } else {
-                            ls.strings.push((0, self.name.clone()));
+            if name_changed {
+                if let Some(name_field) = ifo_struct.find_mut("Mod_Name") {
+                    match name_field {
+                        nwn_lib_rs::gff::FieldValue::String(s) => {
+                            *s = self.name.clone();
                         }
-                    }
-                    _ => {
-                        return Err(ModelError::Format(
-                            "Unsupported Mod_Name field type".into()
-                        ));
+                        nwn_lib_rs::gff::FieldValue::LocString(ls) => {
+                            // Update the English entry without overwriting
+                            // translations for other language identifiers.
+                            if let Some((_, text)) = ls.strings.iter_mut()
+                                .find(|(language, _)| *language == 0)
+                            {
+                                *text = self.name.clone();
+                            } else {
+                                ls.strings.push((0, self.name.clone()));
+                            }
+                        }
+                        _ => {
+                            return Err(ModelError::Format(
+                                "Unsupported Mod_Name field type".into()
+                            ));
+                        }
                     }
                 }
             }
@@ -1670,6 +1684,19 @@ impl Module {
         self.path = path;
         self.modified = false;
         Ok(())
+    }
+}
+
+// Module properties edit the English name when present, independent of the
+// serialized translation order. Fall back to the first available translation.
+fn module_name(ifo: &nwn_gff::GffFile) -> String {
+    match ifo.root().find("Mod_Name") {
+        Some(nwn_gff::FieldValue::LocString(ls)) => ls.strings.iter()
+            .find(|(language, _)| *language == 0)
+            .or_else(|| ls.strings.first())
+            .map(|(_, text)| text.clone())
+            .unwrap_or_default(),
+        _ => ifo.get_string("Mod_Name").unwrap_or_default(),
     }
 }
 
