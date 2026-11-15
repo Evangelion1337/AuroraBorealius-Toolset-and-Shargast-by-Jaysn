@@ -232,14 +232,16 @@ impl Module {
                     area_names_list.push(name);
                 }
                 t if t == resource_types::NSS => {
-                    if let nwn_lib_rs::erf::ResourceData::Buffer(buf) = &r.data {
-                        scripts.insert(name, buf.clone());
-                    }
+                    let data = erf.read_resource_data(r).ok_or_else(|| {
+                        ModelError::Format(format!("Cannot read NSS resource: {}", name))
+                    })?;
+                    scripts.insert(name, data);
                 }
                 t if t == resource_types::DLG => {
-                    if let nwn_lib_rs::erf::ResourceData::Buffer(buf) = &r.data {
-                        conversations.insert(name, buf.clone());
-                    }
+                    let data = erf.read_resource_data(r).ok_or_else(|| {
+                        ModelError::Format(format!("Cannot read DLG resource: {}", name))
+                    })?;
+                    conversations.insert(name, data);
                 }
                 t if t == resource_types::TWO_DA => {
                     if let nwn_lib_rs::erf::ResourceData::Buffer(buf) = &r.data {
@@ -1459,31 +1461,77 @@ impl Module {
             None,
         );
 
-        // Rebuild module.ifo from stored fields
-        let ifo_struct = self.ifo.root_mut();
-        if let Some(name_field) = ifo_struct.find_mut("Mod_Name") {
-            if let nwn_lib_rs::gff::FieldValue::String(s) = name_field {
-                *s = self.name.clone();
+        // Check for edits before normalizing or modifying any IFO fields.
+        let original_ifo = self.erf.as_ref().and_then(|source| {
+            source.get("module", resource_types::IFO)
+                .or_else(|| source.get("Module", resource_types::IFO))
+        });
+
+        let preserve_original_ifo = original_ifo.as_ref().and_then(|bytes| {
+            nwn_gff::GffFile::from_bytes(bytes).ok()
+        }).is_some_and(|original| {
+            original.to_bytes() == self.ifo.to_bytes()
+                && original.get_string("Mod_Name").unwrap_or_default() == self.name
+                && original.get_string("Mod_Description").unwrap_or_default() == self.description
+                && original.get_string("Mod_Entry_Area").unwrap_or_default() == self.entry_area
+                && original.get_string("Mod_Tag").unwrap_or_default() == self.tag
+                && original.get_string("Mod_OnPlayerEnter").unwrap_or_default() == self.on_player_enter
+        });
+
+        if !preserve_original_ifo {
+            // Apply intended metadata edits only when the IFO changed.
+            let ifo_struct = self.ifo.root_mut();
+            if let Some(name_field) = ifo_struct.find_mut("Mod_Name") {
+                match name_field {
+                    nwn_lib_rs::gff::FieldValue::String(s) => {
+                        *s = self.name.clone();
+                    }
+                    nwn_lib_rs::gff::FieldValue::LocString(ls) => {
+                        // Update the English entry without overwriting
+                        // translations for other language identifiers.
+                        if let Some((_, text)) = ls.strings.iter_mut()
+                            .find(|(language, _)| *language == 0)
+                        {
+                            *text = self.name.clone();
+                        } else {
+                            ls.strings.push((0, self.name.clone()));
+                        }
+                    }
+                    _ => {
+                        return Err(ModelError::Format(
+                            "Unsupported Mod_Name field type".into()
+                        ));
+                    }
+                }
             }
-        }
-        if let Some(desc_field) = ifo_struct.find_mut("Mod_Description") {
-            if let nwn_lib_rs::gff::FieldValue::String(s) = desc_field {
-                *s = self.description.clone();
+            if let Some(desc_field) = ifo_struct.find_mut("Mod_Description") {
+                if let nwn_lib_rs::gff::FieldValue::String(s) = desc_field {
+                    *s = self.description.clone();
+                }
             }
-        }
-        if let Some(entry_field) = ifo_struct.find_mut("Mod_Entry_Area") {
-            if let nwn_lib_rs::gff::FieldValue::String(s) = entry_field {
-                *s = self.entry_area.clone();
+            if let Some(entry_field) = ifo_struct.find_mut("Mod_Entry_Area") {
+                if let nwn_lib_rs::gff::FieldValue::String(s) = entry_field {
+                    *s = self.entry_area.clone();
+                }
             }
-        }
-        if let Some(tag_field) = ifo_struct.find_mut("Mod_Tag") {
-            if let nwn_lib_rs::gff::FieldValue::String(s) = tag_field {
-                *s = self.tag.clone();
+            if let Some(tag_field) = ifo_struct.find_mut("Mod_Tag") {
+                if let nwn_lib_rs::gff::FieldValue::String(s) = tag_field {
+                    *s = self.tag.clone();
+                }
             }
+            set_or_add_ifo(
+                ifo_struct,
+                "Mod_OnPlayerEnter",
+                nwn_lib_rs::gff::FieldValue::ResRef(self.on_player_enter.clone()),
+            );
         }
-        set_or_add_ifo(ifo_struct, "Mod_OnPlayerEnter", nwn_lib_rs::gff::FieldValue::ResRef(self.on_player_enter.clone()));
-        // Write IFO
-        let ifo_bytes = self.ifo.to_bytes();
+
+        let ifo_bytes = if preserve_original_ifo {
+            original_ifo.expect("Preserved IFO requires original bytes")
+        } else {
+            self.ifo.to_bytes()
+        };
+
         erf.add_resource("module", resource_types::IFO, ifo_bytes);
 
         // Write scripts (NSS and compiled NCS)
@@ -1505,7 +1553,9 @@ impl Module {
             let are_data = self.modified_area_data.get(&name_lower)
                 .cloned()
                 .or_else(|| self.erf.as_ref().and_then(|e| e.get(name.trim(), resource_types::ARE)))
-                .unwrap_or_default();
+                .ok_or_else(|| ModelError::NotFound(format!(
+                    "Missing ARE resource while saving: {}", name
+                )))?;
             erf.add_resource(name.trim(), resource_types::ARE, are_data);
         }
         for (name, data) in &self.modified_area_data {
@@ -1522,7 +1572,9 @@ impl Module {
                 // Skip resources we already wrote
                 if rt == resource_types::IFO { continue; }
                 if rt == resource_types::NSS { continue; }
-                if rt == resource_types::NCS { continue; }
+                if rt == resource_types::NCS
+                    && self.compiled.keys().any(|name| name.eq_ignore_ascii_case(&rname))
+                { continue; }
                 if rt == resource_types::DLG { continue; }
                 if rt == resource_types::ARE { continue; }
                 // Skip GIT resources that have been modified (written from raw_git)
@@ -1535,9 +1587,12 @@ impl Module {
                 if rt == resource_types::TLK && self.modified_tlk.is_some() { continue; }
                 // Skip JRL if modified
                 if rt == resource_types::JRL && self.modified_jrl.is_some() { continue; }
-                if let Some(data) = nwn_erf::extract_resource_data(&r.data) {
-                    erf.add_resource(&rname, rt, data);
-                }
+                let data = src_erf.read_resource_data(r).ok_or_else(|| {
+                    ModelError::Format(format!(
+                        "Cannot preserve resource {} (type {})", rname, rt
+                    ))
+                })?;
+                erf.add_resource(&rname, rt, data);
             }
         }
 
@@ -1567,7 +1622,50 @@ impl Module {
         }
 
         let bytes = erf.to_bytes()?;
-        std::fs::write(&path, bytes)?;
+
+        // Save beside the destination so the final rename is atomic.
+        // A failed write must never truncate an existing module.
+        let parent = path.parent()
+            .filter(|p| !p.as_os_str().is_empty())
+            .unwrap_or_else(|| Path::new("."));
+        let filename = path.file_name().ok_or_else(|| {
+            ModelError::Format("Invalid module destination".to_string())
+        })?;
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| ModelError::Format(e.to_string()))?
+            .as_nanos();
+        let temp_path = parent.join(format!(
+            ".{}.{}.{nonce}.tmp",
+            filename.to_string_lossy(),
+            std::process::id()
+        ));
+
+        let write_result = (|| -> Result<()> {
+            use std::io::Write;
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&temp_path)?;
+
+            // Preserve destination permissions when replacing a file.
+            if let Ok(metadata) = std::fs::metadata(&path) {
+                file.set_permissions(metadata.permissions())?;
+            }
+
+            file.write_all(&bytes)?;
+            file.sync_all()?;
+            drop(file);
+
+            std::fs::rename(&temp_path, &path)?;
+            Ok(())
+        })();
+
+        if write_result.is_err() {
+            let _ = std::fs::remove_file(&temp_path);
+        }
+        write_result?;
+
         self.erf = Some(erf);
         self.path = path;
         self.modified = false;
